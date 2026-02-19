@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script src="https://live.zwidgets.com/js-sdk/1.5/ZohoEmbededAppSDK.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+
+    <div id="loading" class="loading">Loading...</div>
+
+    <div id="widget" class="widget hidden">
+      <div class="header">
+        <div class="deal-info">
+          <h2 id="deal-name"></h2>
+          <span id="patient-info"></span>
+        </div>
+        <div class="visit-badge" id="visit-no"></div>
+      </div>
+
+      <div class="services-section">
+        <div class="section-title">
+          <span>Services Offered</span>
+          <label class="select-all-label">
+            <input type="checkbox" id="select-all"> Select All
+          </label>
+        </div>
+
+        <table class="services-table">
+          <thead>
+            <tr>
+              <th class="col-check"></th>
+              <th class="col-category">Category</th>
+              <th class="col-service">Service</th>
+              <th class="col-qty">Qty</th>
+              <th class="col-price">Price</th>
+              <th class="col-total">Total</th>
+            </tr>
+          </thead>
+          <tbody id="services-body">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="summary">
+        <span class="summary-label">Selected Total:</span>
+        <span class="summary-amount" id="selected-total">KES 0.00</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn-bill" id="bill-btn" disabled>Invoice</button>
+      </div>
+
+    </div>
+  </body>
+</html>
