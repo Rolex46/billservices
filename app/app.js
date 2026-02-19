@@ -85,12 +85,23 @@ function renderWidget(record) {
             "dealId": currentRecordId,
             "lineservices": { "items": selectedServices }
         };
-        // console.log("Arguments being sent:", JSON.stringify(args, null, 2));
+        var btn = document.getElementById("bill-btn");
+        btn.disabled = true;
+        document.getElementById("btn-spinner").classList.remove("hidden");
+        document.getElementById("btn-label").textContent = "Processing...";
 
         ZOHO.CRM.FUNCTIONS.execute("combinedserviceinvoice", {
             "arguments": JSON.stringify(args)
         }).then(function(result) {
             console.log("Function result:", result);
+            ZOHO.CRM.UI.Popup.close().then(function(data) {
+                console.log(data);
+            });
+        }).catch(function(err) {
+            console.log("Function error:", err);
+            document.getElementById("btn-spinner").classList.add("hidden");
+            document.getElementById("btn-label").textContent = "Invoice";
+            btn.disabled = false;
         });
     });
 
