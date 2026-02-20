@@ -83,6 +83,7 @@ function renderWidget(record) {
             });
         var args = {
             "dealId": currentRecordId,
+            "OpNumber": currentRecord.OP_Visit_No || "",
             "lineservices": { "items": selectedServices }
         };
         var btn = document.getElementById("bill-btn");
