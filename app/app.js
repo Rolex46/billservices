@@ -22,28 +22,24 @@ function renderWidget(record) {
         (record.Patient_Number || "") + "  |  " + (record.Contact_Name ? record.Contact_Name.name : "");
     document.getElementById("visit-no").textContent = record.OP_Visit_No || "";
 
-    var services = record.Services_Offered || [];
+    var services = (record.Services_Offered || []).filter(function (svc) {
+        return svc.Invoice_Status !== "Invoiced";
+    });
     var tbody = document.getElementById("services-body");
     tbody.innerHTML = "";
 
     if (services.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty">No services found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">All services have been invoiced.</td></tr>';
     } else {
         services.forEach(function (svc) {
-            var isBilled = svc.Invoice_Status === "Billed";
             var total = svc.Total || 0;
 
             var tr = document.createElement("tr");
-            tr.className = isBilled ? "billed-row" : "";
             tr.dataset.id = svc.id;
             tr.dataset.total = total;
 
             tr.innerHTML =
-                '<td class="col-check">' +
-                (isBilled
-                    ? '<span class="billed-badge">Billed</span>'
-                    : '<input type="checkbox" class="svc-checkbox" data-total="' + total + '">') +
-                '</td>' +
+                '<td class="col-check"><input type="checkbox" class="svc-checkbox" data-total="' + total + '"></td>' +
                 '<td class="col-category">' + (svc.Product_Category || "-") + '</td>' +
                 '<td class="col-service">' + (svc.Service ? svc.Service.name : "-") + '</td>' +
                 '<td class="col-qty">' + (svc.Quantity || 1) + '</td>' +
@@ -95,9 +91,29 @@ function renderWidget(record) {
             "arguments": JSON.stringify(args)
         }).then(function(result) {
             console.log("Function result:", result);
-            ZOHO.CRM.UI.Popup.close().then(function(data) {
-                console.log(data);
+
+            // Update ALL subform rows — only change Invoice_Status on selected ones.
+            // Omitting rows from a subform update deletes them, so all must be included.
+            var allServiceUpdates = (currentRecord.Services_Offered || []).map(function(svc) {
+                return {
+                    id: svc.id,
+                    Invoice_Status: selectedIds.indexOf(svc.id) !== -1 ? "Invoiced" : (svc.Invoice_Status || null)
+                };
             });
+
+            ZOHO.CRM.API.updateRecord({
+                Entity: "Deals",
+                APIData: {
+                    id: currentRecordId,
+                    Services_Offered: allServiceUpdates
+                }
+            }).then(function(updateResult) {
+                console.log("Subform updated:", updateResult);
+                ZOHO.CRM.UI.Popup.closeReload().then(function(data) {
+                    console.log(data);
+                });
+            });
+
         }).catch(function(err) {
             console.log("Function error:", err);
             document.getElementById("btn-spinner").classList.add("hidden");
